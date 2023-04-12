@@ -111,8 +111,6 @@ void register_user() {
     std::cout << "Full Name: ";
     std::getline(std::cin, name, '\n');
 
-    std::cout << name << username;
-
     std::cout << "Age: ";
     std::cin >> age;
 
@@ -172,8 +170,8 @@ void register_user() {
     std::cout << "Did you had Lung Cancer before?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
     std::cout << "2 - No" << std::endl;
-    std::cin >> user_option;
-    switch (user_option) {
+    std::cin >> cancer_history;
+    switch (cancer_history) {
     case 1:
         cancer_history = 1;
     case 2:
@@ -187,8 +185,8 @@ void register_user() {
     std::cout << "Did you smoked before?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
     std::cout << "2 - No" << std::endl;
-    std::cin >> user_option;
-    switch (user_option) {
+    std::cin >> smoking_history;
+    switch (smoking_history) {
     case 1:
         smoking_history = 1;
     case 2:
@@ -203,7 +201,7 @@ void register_user() {
     std::hash<std::string> hasher;
     size_t hash = hasher(password);
 
-    std::ofstream users("users.csv");
+    std::ofstream users("users.csv", std::ios::out | std::ios::app);
     users << username << "," << hash << "," << name << "," << age << "," << cancer_level << "," << diabetes_type << "," << smoking_quantity << "," << cancer_history << "," << smoking_history << std::endl;
     users.close();
 }
