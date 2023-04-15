@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
 
 std::vector<std::string> user_info;
@@ -237,7 +238,11 @@ void register_user() {
 
     std::cout << "Set password: ";
     std::cin >> password;
+}
 
+
+
+void set_cancer_stage(){
     std::cout << "Do you have Lung Cancer?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
     std::cout << "2 - No" << std::endl;
@@ -266,7 +271,9 @@ void register_user() {
             std::cout << "Error - Incorrect answer" << std::endl;
             break;
     }
+}
 
+void set_diabetes_type(){
     std::cout << "Do you have any type of diabetes?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
     std::cout << "2 - No" << std::endl;
@@ -287,9 +294,9 @@ void register_user() {
             std::cout << "Error: Incorrect answer" << std::endl;
             break;
     }
-    
-    smoking_status();
+}
 
+void set_medical_history(){
     std::cout << "Now, let's ask some questions about your medical history." << std::endl;
     std::cout << "Did you had Lung Cancer before?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
@@ -328,8 +335,9 @@ void register_user() {
         std::cout << "Error - Incorrect answer" << std::endl;
         break;
     }
+}
 
-
+void writing_new_user(){
     std::hash<std::string> hasher;
     size_t hash = hasher(password);
 
@@ -353,6 +361,11 @@ int main()
         switch (user_option) {
         case 1:
             register_user();
+            set_cancer_stage();
+            set_diabetes_type();
+            smoking_status();
+            set_medical_history();
+            writing_new_user();
             break;
         case 2:
             login();
