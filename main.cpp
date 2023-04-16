@@ -14,6 +14,7 @@ std::string saved_password, temporary, username, password, name = "";
 int is_admin, user_option, age, cancer, cancer_level, is_smoker, smoking_quantity, cancer_history, smoking_history, diabetes_type = 0;
 
 float shots, temp_cost, total_cost = 0.00f;
+float gbp_convert = 1.24f;
 
 
 void reading_medical() {
@@ -100,9 +101,35 @@ void reading_medical() {
         break;
     }
     std::cout << "=============================" << std::endl;
-    std::cout << "Total Cost for 28 days (a month): " << total_cost << std::endl;
+
+    std::cout << "Total cost per day: " << total_cost / 28 << "$" << " or equivalent to GBP " << (total_cost / 28) / gbp_convert << std::endl;
+    std::cout << "Total cost per week: " << total_cost / 4 << "$" << " or equivalent to GBP " << (total_cost / 4) / gbp_convert << std::endl;
+    std::cout << "Total Cost for 28 days (a month): " << total_cost << "$" << " or equivalent to GBP " << total_cost / gbp_convert << std::endl;
+    std::cout << "Total cost per year: " << total_cost * 12 << "$" << " or equivalent to GBP " << (total_cost * 12) / gbp_convert << std::endl;
 }
 
+void reading_history() {
+    switch (std::stoi(user_info.at(7))) {
+    case 0:
+        std::cout << "You have no history of lung cancer." << std::endl;
+        break;
+
+    case 1:
+
+        std::cout << "You've had lung cancer in the past, according to your medical history." << std::endl;
+        break;
+    }
+
+    switch (std::stoi(user_info.at(8))) {
+    case 0:
+        std::cout << "You have no history of smoking." << std::endl;
+        break;
+
+    case 1:
+        std::cout << "You have been smoking in the past, according to your medical history." << std::endl;
+        break;
+    }
+}
 
 void login() {
 
@@ -142,56 +169,106 @@ void login() {
             user_info.push_back(temporary);
         }
     }
+}
 
+void loggedIn() {
     std::hash<std::string> hasher;
     size_t hash = hasher(password);
-
     saved_password = user_info.at(1);
     std::stringstream stream(saved_password);
     size_t saved_hash;
     stream >> saved_hash;
     if (hash == saved_hash) {
-        std::cout << "Welcome " << user_info.at(0) << "!" << std::endl;
-        std::cout << "What would you like to do?" << std::endl;
-        std::cout << "1 - See current medical conditions" << std::endl;
-        std::cout << "2 - See medical history" << std::endl;
-        std::cout << "3 - See the whole medical report" << std::endl;
-        std::cout << "Your input: ";
-        std::cin >> user_option;
-        switch (user_option) {
+        while (loop_two) {
+            std::cout << "Welcome " << user_info.at(0) << "!" << std::endl;
+            std::cout << "What would you like to do?" << std::endl;
+            std::cout << "1 - See current medical conditions" << std::endl;
+            std::cout << "2 - See medical history" << std::endl;
+            std::cout << "3 - See the whole medical report" << std::endl;
+            std::cout << "Your input: ";
+            std::cin >> user_option;
+            switch (user_option) {
             case 1:
                 reading_medical();
-                while (loop_two) {
-                    std::cout << "Do you want to log out? "<< std::endl;
-                    std::cout << "1 - Yes" << std::endl;
-                    std::cout << "2 - No" << std::endl;
 
-                    switch (user_option)
-                    {
-                    case 1:
-                        break;
-                    case 2:
-                        break;
-                    default:
-                        break;
-                    }
+                std::cout << "Do you want to log out? " << std::endl;
+                std::cout << "1 - Yes" << std::endl;
+                std::cout << "2 - No" << std::endl;
+                std::cout << "Your input: ";
+                std::cin >> user_option;
+                switch (user_option)
+                {
+                case 1:
+                    user_info = {};
+                    loop_two = false;
+                    system("cls");
+                    break;
+                case 2:
+                    loop_two = true;
+                    break;
+                default:
+                    break;
                 }
+
                 break;
             case 2:
-
+                reading_history();
+                std::cout << "Do you want to log out? " << std::endl;
+                std::cout << "1 - Yes" << std::endl;
+                std::cout << "2 - No" << std::endl;
+                std::cout << "Your input: ";
+                std::cin >> user_option;
+                switch (user_option)
+                {
+                case 1:
+                    user_info = {};
+                    loop_two = false;
+                    system("cls");
+                    break;
+                case 2:
+                    loop_two = true;
+                    break;
+                default:
+                    break;
+                }
                 break;
-
+            case 3:
+                reading_medical();
+                std::cout << "=============================" << std::endl;
+                reading_history();
+                std::cout << "Do you want to log out? " << std::endl;
+                std::cout << "1 - Yes" << std::endl;
+                std::cout << "2 - No" << std::endl;
+                std::cout << "Your input: ";
+                std::cin >> user_option;
+                switch (user_option)
+                {
+                case 1:
+                    user_info = {};
+                    loop_two = false;
+                    system("cls");
+                    break;
+                case 2:
+                    loop_two = true;
+                    break;
+                default:
+                    break;
+                }
+                break;
             default:
                 std::cout << "Error - Try again" << std::endl;
                 break;
+            }
         }
-
     }
     else {
         std::cout << "Wrong Password" << std::endl;
     }
 }
 
+void adminLoggedIn() {
+
+}
 
 void smoking_status() {
 
@@ -221,7 +298,6 @@ void smoking_status() {
     }
 }
 
-
 void register_user() {
     std::cout << "Registering new user..." << std::endl;
 
@@ -239,8 +315,6 @@ void register_user() {
     std::cout << "Set password: ";
     std::cin >> password;
 }
-
-
 
 void set_cancer_stage(){
     std::cout << "Do you have Lung Cancer?" << std::endl;
@@ -366,9 +440,16 @@ int main()
             smoking_status();
             set_medical_history();
             writing_new_user();
+            
             break;
         case 2:
             login();
+            if (is_admin == 1) {
+                adminLoggedIn();
+            }
+            else {
+                loggedIn();
+            }
             break;
 
         default:
