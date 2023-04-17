@@ -6,14 +6,11 @@
 #include <sstream>
 #include <cstdlib>
 
-
-std::vector<std::string> user_info;
+std::vector<std::string> user_info = {};
 bool main_loop = true, loop_two = true;
 std::string saved_password, temporary, username, password, name = "";
-
-int is_admin, user_option, age, cancer, cancer_level, is_smoker, smoking_quantity, cancer_history, smoking_history, diabetes_type = 0;
-
-float shots, temp_cost, total_cost = 0.00f;
+int staff_level = 0, access_level = 0, user_option = 0, age = 0, cancer = 0, cancer_level = 0, is_smoker = 0, smoking_quantity = 0, cancer_history = 0, smoking_history = 0, diabetes_type = 0;
+float shots = 0.00f, temp_cost = 0.00f, total_cost = 0.00f;
 float gbp_convert = 1.24f;
 
 
@@ -28,7 +25,6 @@ void reading_medical() {
         break;
 
     case 1:
-        //start from here the coding session doing the calculation for 28 days
         total_cost = total_cost + temp_cost;
         std::cout << "You are diagnosed with stage 1 Lung cancer" << std::endl;
         std::cout << "Your treatment is: 1 session of chemotherapy every 4 weeks." << std::endl;
@@ -141,12 +137,11 @@ void login() {
 
     switch (user_option) {
         case 1:
-            is_admin = 0;
+            access_level = 0;
             break;
         case 2:
-            is_admin = 1;
+            access_level = 1;
             break;
-
         default:
             std::cout << "Error - Try again" << std::endl;
             break;
@@ -157,9 +152,9 @@ void login() {
     std::cout << "Password: ";
     std::cin >> password;
 
-    if (is_admin == 1) {
-        std::ifstream admins("admins.csv");
-        while (getline(admins, temporary, ',')) {
+    if (access_level == 1) {
+        std::ifstream staff("staff.csv");
+        while (getline(staff, temporary, ',')) {
             user_info.push_back(temporary);
         }
     }
@@ -266,8 +261,42 @@ void loggedIn() {
     }
 }
 
-void adminLoggedIn() {
-
+void staffLoggedIn() {
+    std::hash<std::string> hasher;
+    size_t hash = hasher(password);
+    saved_password = user_info.at(1);
+    std::stringstream stream(saved_password);
+    size_t saved_hash;
+    stream >> saved_hash;
+    if (hash == saved_hash) {
+        switch (stoi(user_info.at(3)))
+        {
+        case 1:
+            std::cout << "Welcome pharmacist " << user_info.at(2) << "!" << std::endl;
+            std::cout << "What would you like to do?" << std::endl;
+            std::cout << "1 - Create a pharmacist account" << std::endl;
+            std::cout << "2 - Change prescriptions of a user" << std::endl;
+            std::cout << "3 - See the averages" << std::endl;
+            std::cout << "Your input: ";
+            std::cin >> user_option;
+            switch (user_option) {
+            case 1:
+                register_user();
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            }
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void smoking_status() {
@@ -299,6 +328,7 @@ void smoking_status() {
 }
 
 void register_user() {
+
     std::cout << "Registering new user..." << std::endl;
 
     std::cout << "Username: ";
@@ -306,14 +336,16 @@ void register_user() {
     std::cin.sync();
     std::cin.get();
 
+    std::cout << "Set password: ";
+    std::cin >> password;
+
     std::cout << "Full Name: ";
     std::getline(std::cin, name, '\n');
 
-    std::cout << "Age: ";
-    std::cin >> age;
-
-    std::cout << "Set password: ";
-    std::cin >> password;
+    if (access_level == 0) {
+        std::cout << "Age: ";
+        std::cin >> age;
+    }
 }
 
 void set_cancer_stage(){
@@ -423,7 +455,6 @@ void writing_new_user(){
 
 int main()
 {
-
     while (main_loop) {
         std::cout << "Welcome to the NHS Command Line Program" << std::endl;
         std::cout << "What do you want to do?" << std::endl;
@@ -444,8 +475,8 @@ int main()
             break;
         case 2:
             login();
-            if (is_admin == 1) {
-                adminLoggedIn();
+            if (access_level == 1) {
+                staffLoggedIn();
             }
             else {
                 loggedIn();
@@ -457,6 +488,4 @@ int main()
             break;
         }
     }
-
-
 }
