@@ -7,6 +7,9 @@
 #include <cstdlib>
 
 std::vector<std::string> user_info = {};
+std::vector<std::string> patient_info = {};
+std::vector<std::string> compare_vector = {};
+std::vector<std::string> compare_vector2 = {};
 bool main_loop = true, loop_two = true;
 std::string saved_password, temporary, username, password, name = "";
 int staff_level = 0, access_level = 0, user_option = 0, age = 0, cancer = 0, cancer_level = 0, is_smoker = 0, smoking_quantity = 0, cancer_history = 0, smoking_history = 0, diabetes_type = 0;
@@ -262,6 +265,7 @@ void loggedIn() {
 }
 
 void staffLoggedIn() {
+    std::ifstream users("users.csv");
     std::hash<std::string> hasher;
     size_t hash = hasher(password);
     saved_password = user_info.at(1);
@@ -284,7 +288,40 @@ void staffLoggedIn() {
                 register_user();
                 break;
             case 2:
+                std::cout << "Input the username of the person in question: ";
+                std::cin >> temporary;
+
+                if (temporary == patient_info.at(0)) {
+                    while (getline(users, temporary, ',')) {
+                        patient_info.push_back(temporary);
+                    }
+                    std::cout << "What would you like to change?" << std::endl;
+                    std::cout << "1 - Change the cancer stage" << std::endl;
+                    std::cout << "2 - Change the diabetes type" << std::endl;
+                    std::cout << "3 - Change the smoking status" << std::endl;
+                    std::cout << "Your input: ";
+                    std::cin >> user_option;
+                    switch (user_option) {
+                    case 1:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        set_cancer_stage();
+                        patient_info.at(4) = std::to_string(cancer_level);
+                        break;
+                    case 2:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        set_diabetes_type();
+                        patient_info.at(5) = std::to_string(diabetes_type);
+                        break;
+                    case 3:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        smoking_status();
+                        patient_info.at(6) = std::to_string(smoking_quantity);
+                        break;
+                    }
+                }
+
                 break;
+
             case 3:
                 break;
             }
@@ -360,15 +397,21 @@ void set_cancer_stage(){
             user_option = 0;
             main_loop = false;
             cancer_level = 1;
+            while (loop_two) {
                 std::cout << "What is the stage of the cancer?" << std::endl;
                 std::cout << "Your input: ";
                 std::cin >> cancer_level;
                 if (cancer_level > 4) {
                     std::cout << "The stage of the cancer cannot be bigger than 4. Please try again." << std::endl;
                 }
+                else {
+                    loop_two = false;
+                }
+            }
             break;
 
         case 2:
+
             cancer_level = 0;
             std::cout << "Thanks for letting us know!" << std::endl;
             break;
@@ -452,6 +495,22 @@ void writing_new_user(){
     users.close();
 }
 
+void modify_patient_data() {
+    loop_two = true;
+    temporary = patient_info.at(0);
+    std::ifstream users("users.csv");
+    while (loop_two) {
+
+        if (patient_info.at(0) == compare_vector.at(0)) {
+            while (getline(users, temporary, '\n')) {
+                compare_vector2.push_back(temporary);
+            }
+            std::ofstream users("users.csv", std::ios::out | std::ios::app);
+            users.replace();
+            users << patient_info.at(0) << "," << patient_info.at(1) << "," << patient_info.at(2) << "," << patient_info.at(3) << "," << patient_info.at(4) << "," << patient_info.at(5) << "," << patient_info.at(6) << "," << patient_info.at(7) << "," << patient_info.at(8) << std::endl;
+        }
+    }
+}
 
 int main()
 {
