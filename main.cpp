@@ -5,18 +5,22 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <algorithm>
 
 std::vector<std::string> user_info = {};
 std::vector<std::string> patient_info = {};
 std::vector<std::string> compare_vector = {};
 std::vector<std::string> compare_vector2 = {};
+std::vector<int> cancer_average = {};
+std::vector<int> diabetes_average = {};
+std::vector<int> history_cancer_average = {};
 bool main_loop = true, loop_two = true;
-std::string saved_password, temporary, username, password, name = "";
-int staff_level = 0, access_level = 0, user_option = 0, age = 0, cancer = 0, cancer_level = 0, is_smoker = 0, smoking_quantity = 0, cancer_history = 0, smoking_history = 0, diabetes_type = 0;
+std::string saved_password,temp_username, temp_age, temp_password,temp_cancer, temp_smoking, temp_diabetes, temp_s_history, temp_c_history, temporary, username, password, name = "";
+int staff_level = 0, access_level = 0, user_option = 0, age = 0, cancer = 0, cancer_level = 0, is_smoker = 0, smoking_quantity = 0, cancer_history = 0, smoking_history = 0, diabetes_type = 0, avg_age1 = 0 , avg_age2 = 0, avg_age3 = 0;
 float shots = 0.00f, temp_cost = 0.00f, total_cost = 0.00f;
 float gbp_convert = 1.24f;
 
-
+//This function is used to decode what was read from the CSV file to the medical record the user can understand
 void reading_medical() {
 
     temp_cost = 10000.00f;
@@ -107,6 +111,7 @@ void reading_medical() {
     std::cout << "Total cost per year: " << total_cost * 12 << "$" << " or equivalent to GBP " << (total_cost * 12) / gbp_convert << std::endl;
 }
 
+//This function is used to decode what was read from the CSV file to the medical record the user can understand
 void reading_history() {
     switch (std::stoi(user_info.at(7))) {
     case 0:
@@ -130,6 +135,7 @@ void reading_history() {
     }
 }
 
+//This function is firstly called so the user can input their login credentials
 void login() {
 
     std::cout << "Login as:" << std::endl;
@@ -169,6 +175,9 @@ void login() {
     }
 }
 
+//This function takes care of what happens after a successful user login happens
+//Things such as the password verification and username verification are happening here
+//From here the user can access their medical history, see the current medical conditions and see the detailed medical report which includes the cost of their treatment
 void loggedIn() {
     std::hash<std::string> hasher;
     size_t hash = hasher(password);
@@ -264,78 +273,31 @@ void loggedIn() {
     }
 }
 
-void staffLoggedIn() {
-    std::ifstream users("users.csv");
-    std::hash<std::string> hasher;
-    size_t hash = hasher(password);
-    saved_password = user_info.at(1);
-    std::stringstream stream(saved_password);
-    size_t saved_hash;
-    stream >> saved_hash;
-    if (hash == saved_hash) {
-        switch (stoi(user_info.at(3)))
-        {
-        case 1:
-            std::cout << "Welcome pharmacist " << user_info.at(2) << "!" << std::endl;
-            std::cout << "What would you like to do?" << std::endl;
-            std::cout << "1 - Create a pharmacist account" << std::endl;
-            std::cout << "2 - Change prescriptions of a user" << std::endl;
-            std::cout << "3 - See the averages" << std::endl;
-            std::cout << "Your input: ";
-            std::cin >> user_option;
-            switch (user_option) {
-            case 1:
-                register_user();
-                break;
-            case 2:
-                std::cout << "Input the username of the person in question: ";
-                std::cin >> temporary;
 
-                if (temporary == patient_info.at(0)) {
-                    while (getline(users, temporary, ',')) {
-                        patient_info.push_back(temporary);
-                    }
-                    std::cout << "What would you like to change?" << std::endl;
-                    std::cout << "1 - Change the cancer stage" << std::endl;
-                    std::cout << "2 - Change the diabetes type" << std::endl;
-                    std::cout << "3 - Change the smoking status" << std::endl;
-                    std::cout << "Your input: ";
-                    std::cin >> user_option;
-                    switch (user_option) {
-                    case 1:
-                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
-                        set_cancer_stage();
-                        patient_info.at(4) = std::to_string(cancer_level);
-                        break;
-                    case 2:
-                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
-                        set_diabetes_type();
-                        patient_info.at(5) = std::to_string(diabetes_type);
-                        break;
-                    case 3:
-                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
-                        smoking_status();
-                        patient_info.at(6) = std::to_string(smoking_quantity);
-                        break;
-                    }
-                }
+//This is the first part of the registration process where the user is asked details such as a username, password, their name and age
+void register_user() {
 
-                break;
+    std::cout << "Registering new user..." << std::endl;
 
-            case 3:
-                break;
-            }
-            break;
-        case 2:
-            break;
-        case 3:
-            break;
-        default:
-            break;
-        }
+    std::cout << "Username: ";
+    std::cin >> username;
+    std::cin.sync();
+    std::cin.get();
+
+    std::cout << "Set password: ";
+    std::cin >> password;
+
+    std::cout << "Full Name: ";
+    std::getline(std::cin, name, '\n');
+
+    if (access_level == 0) {
+        std::cout << "Age: ";
+        std::cin >> age;
     }
 }
 
+//This is the part of the registration process where the user is asked if they smoke and if so how frequently
+//The function in question is also used to modify the patient data by a pharmacist
 void smoking_status() {
 
     std::cout << "Are you smoking?" << std::endl;
@@ -364,27 +326,8 @@ void smoking_status() {
     }
 }
 
-void register_user() {
-
-    std::cout << "Registering new user..." << std::endl;
-
-    std::cout << "Username: ";
-    std::cin >> username;
-    std::cin.sync();
-    std::cin.get();
-
-    std::cout << "Set password: ";
-    std::cin >> password;
-
-    std::cout << "Full Name: ";
-    std::getline(std::cin, name, '\n');
-
-    if (access_level == 0) {
-        std::cout << "Age: ";
-        std::cin >> age;
-    }
-}
-
+//This is the part of the registration process where the user is asked if they have cancer and if so at what stage
+//The function in question is also used to modify the patient data by a pharmacist
 void set_cancer_stage(){
     std::cout << "Do you have Lung Cancer?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
@@ -422,6 +365,8 @@ void set_cancer_stage(){
     }
 }
 
+//This is the part of the registration process where the user is asked if they had diabetes
+//The function in question is also used to modify the patient data by a pharmacist
 void set_diabetes_type(){
     std::cout << "Do you have any type of diabetes?" << std::endl;
     std::cout << "1 - Yes" << std::endl;
@@ -445,6 +390,8 @@ void set_diabetes_type(){
     }
 }
 
+//This is the final part of the registration process a user needs to do.
+//This is wehre the user is asked about their medical history (if they smoked/had cancer)
 void set_medical_history(){
     std::cout << "Now, let's ask some questions about your medical history." << std::endl;
     std::cout << "Did you had Lung Cancer before?" << std::endl;
@@ -486,30 +433,201 @@ void set_medical_history(){
     }
 }
 
-void writing_new_user(){
-    std::hash<std::string> hasher;
-    size_t hash = hasher(password);
-
-    std::ofstream users("users.csv", std::ios::out | std::ios::app);
-    users << username << "," << hash << "," << name << "," << age << "," << cancer_level << "," << diabetes_type << "," << smoking_quantity << "," << cancer_history << "," << smoking_history << std::endl;
-    users.close();
-}
-
+//This function is used to modify the patient data by a pharmacist account
 void modify_patient_data() {
     loop_two = true;
     temporary = patient_info.at(0);
     std::ifstream users("users.csv");
-    while (loop_two) {
+        while (getline(users, temporary, ',')) {
+            compare_vector.push_back(temporary);
+        }
+    
+        std::string strToBeSearched = patient_info.at(0);
 
-        if (patient_info.at(0) == compare_vector.at(0)) {
-            while (getline(users, temporary, '\n')) {
-                compare_vector2.push_back(temporary);
+        if (std::find(compare_vector.begin(), compare_vector.end(), strToBeSearched) != compare_vector.end())
+        {
+            compare_vector.erase(std::remove(compare_vector.begin(), compare_vector.end(), strToBeSearched), compare_vector.end());
+        }
+        for (int i = 0; i < compare_vector.size(); i++) {
+            if (i == 0) {
+                std::ofstream users("users.csv", std::ios::out);
+                users << compare_vector[i] << std::endl;
+                users.close();
             }
-            std::ofstream users("users.csv", std::ios::out | std::ios::app);
-            users.replace();
-            users << patient_info.at(0) << "," << patient_info.at(1) << "," << patient_info.at(2) << "," << patient_info.at(3) << "," << patient_info.at(4) << "," << patient_info.at(5) << "," << patient_info.at(6) << "," << patient_info.at(7) << "," << patient_info.at(8) << std::endl;
+            else {
+                std::ofstream users("users.csv", std::ios::out | std::ios::app);
+                users << compare_vector[i] << std::endl;
+                            users.close();
+            }
+        }
+        std::ofstream user("users.csv", std::ios::out | std::ios::app);
+        user << patient_info.at(0) << "," << patient_info.at(1) << "," << patient_info.at(2) << "," << patient_info.at(3) << "," << patient_info.at(4) << "," << patient_info.at(5) << "," << patient_info.at(6) << "," << patient_info.at(7) << "," << patient_info.at(8) << std::endl;
+        
+}
+
+//Function used to calculate te average age of people affected by cancer or diabetes and those who recovered from cancer
+void calculate_averages() {
+    std::ifstream users("users.csv");
+     while (getline(users, temporary, ',')) {
+        compare_vector2.push_back(temporary);
+        std::cout << temporary;
+     }
+     //Current cancer patients
+     if (stoi(compare_vector2.at(4)) > 0)
+     {
+         cancer_average.push_back(std::stoi(compare_vector2.at(3)));
+     }
+     //Diabetes
+     if (stoi(compare_vector2.at(5)) >= 1) {
+         diabetes_average.push_back(std::stoi(compare_vector2.at(3)));
+     }
+     //Treated cancer patients
+     if (stoi(compare_vector2.at(7)) == 1) {
+         history_cancer_average.push_back(std::stoi(compare_vector2.at(3)));
+     }
+
+     for (int i = 0; i < cancer_average.size(); i++) {
+         avg_age1 = avg_age1 + cancer_average[i];
+     }
+
+     for (int i = 0; i < diabetes_average.size(); i++) {
+         avg_age2 = avg_age2 + diabetes_average[i];
+     }
+
+     for (int i = 0; i < history_cancer_average.size(); i++) {
+         avg_age3 = avg_age3 + history_cancer_average[i];
+     }
+
+     avg_age1 = avg_age1 / cancer_average.size();
+     avg_age2 = avg_age2 / diabetes_average.size();
+     if (history_cancer_average.size() == 0) {
+         avg_age3 = 0;
+     }
+     else {
+         avg_age3 = avg_age3 / history_cancer_average.size();
+     }
+     std::cout << "The average age for being diagnosed with cancer is: " << avg_age1 << std::endl;
+     std::cout << "The average age for being cured from cancer is: " << avg_age3 << std::endl;
+     std::cout << "The average age for being diagnosed with Type 1/2 diabetes is: " << avg_age2 << std::endl;
+}
+
+
+//This is the code taking care of what happens after a member of staff is logged in
+void staffLoggedIn() {
+    std::ifstream users("users.csv");
+    std::hash<std::string> hasher;
+    size_t hash = hasher(password);
+    saved_password = user_info.at(1);
+    std::stringstream stream(saved_password);
+    size_t saved_hash;
+    stream >> saved_hash;
+
+    if (hash == saved_hash && user_info.at(0) == username) {
+        switch (stoi(user_info.at(3)))
+        {
+        case 1:
+            std::cout << "Welcome pharmacist " << user_info.at(2) << "!" << std::endl;
+            std::cout << "What would you like to do?" << std::endl;
+            std::cout << "1 - Create a pharmacist account" << std::endl;
+            std::cout << "2 - Change prescriptions of a user" << std::endl;
+            std::cout << "3 - See the averages" << std::endl;
+            std::cout << "Your input: ";
+            std::cin >> user_option;
+            switch (user_option) {
+            case 1:
+                register_user();
+                break;
+            case 2:
+                std::cout << "Input the username of the person in question: ";
+                std::cin >> temp_username;
+                while (getline(users, temporary, ',')) {
+                    patient_info.push_back(temporary);
+                }
+                if (temp_username == patient_info.at(0)) {
+                    std::cout << "What would you like to change?" << std::endl;
+                    std::cout << "1 - Change the cancer stage" << std::endl;
+                    std::cout << "2 - Change the diabetes type" << std::endl;
+                    std::cout << "3 - Change the smoking status" << std::endl;
+                    std::cout << "Your input: ";
+                    std::cin >> user_option;
+                    switch (user_option) {
+                    case 1:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        set_cancer_stage();
+                        patient_info.at(4) = std::to_string(cancer_level);
+                        break;
+                    case 2:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        set_diabetes_type();
+                        patient_info.at(5) = std::to_string(diabetes_type);
+                        break;
+                    case 3:
+                        std::cout << "=== Remember: The prompt will appear as if you are the user ===" << std::endl;
+                        smoking_status();
+                        patient_info.at(6) = std::to_string(smoking_quantity);
+                        break;
+                    }
+                }
+                modify_patient_data();
+                break;
+
+            case 3:
+                calculate_averages();
+                break;
+            }
+            break;
+
+        case 2:
+            std::cout << "Welcome nurse " << user_info.at(2) << "!" << std::endl;
+            std::cout << "What would you like to do?" << std::endl;
+            std::cout << "1 - See patient list" << std::endl;
+            std::cout << "2 - See the averages" << std::endl;
+            std::cout << "Your input: ";
+            std::cin >> user_option;
+            switch (user_option) {
+            case 1:
+                
+                break;
+            case 2:
+                calculate_averages();
+                break;
+            }
+
+            break;
+
+        case 3:
+            std::cout << "Welcome doctor " << user_info.at(2) << "!" << std::endl;
+            std::cout << "What would you like to do?" << std::endl;
+            std::cout << "1 - See patient list" << std::endl;
+            std::cout << "2 - See the averages" << std::endl;
+            std::cout << "Your input: ";
+            std::cin >> user_option;
+            switch (user_option) {
+            case 1:
+
+                break;
+            case 2:
+                calculate_averages();
+                break;
+            }
+
+            break;
+
+        default:
+            std::cout << "Something went wrong! The login database may be corrupted." << std::endl;
+            break;
         }
     }
+}
+
+//This function gets the variables populated in the registration process and saves them all into the users.csv file
+//This is also where the hashing of the password happens
+void writing_new_user(){
+    std::hash<std::string> hasher;
+    size_t hash = hasher(password);
+    std::ofstream users("users.csv", std::ios::out | std::ios::app);
+    users << username << "," << hash << "," << name << "," << age << "," << cancer_level << "," << diabetes_type << "," << smoking_quantity << "," << cancer_history << "," << smoking_history << std::endl;
+    users.close();
 }
 
 int main()
